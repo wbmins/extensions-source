@@ -85,9 +85,18 @@ jobs:
         run: |
           ./gradlew $MODULES
 
+      - name: Package Gradle cache
+        run: |
+          zip -r gradle-cache.zip ~/.gradle
+      
+      - name: Upload Gradle cache as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-cache
+          path: gradle-cache.zip
+
       - name: Upload APKs (${{ matrix.chunk.number }})
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: "github.repository == 'keiyoushi/extensions-source'"
         with:
           name: "individual-apks-${{ matrix.chunk.number }}"
           path: "**/*.apk"
