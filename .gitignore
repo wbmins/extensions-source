@@ -8,6 +8,9 @@ build/
 *.iml
 repo/
 apk/
+!repo/
+!repo/apk/
+!repo/apk/**
 gen
 generated-src/
 .kotlin
