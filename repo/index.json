@@ -12,12 +12,12 @@
         "name": "E-Hentai",
         "packageName": "eu.kanade.tachiyomi.extension.all.ehentai",
         "resources": {
-          "apkUrl": "https://raw.githubusercontent.com/wbmins/extensions-source/refs/heads/main/repo/apk/tachiyomi-all.ehentai-v1.4.31.apk",
+          "apkUrl": "https://raw.githubusercontent.com/wbmins/extensions-source/refs/heads/main/repo/apk/tachiyomi-all.ehentai-v1.4.32.apk",
           "iconUrl": "https://raw.githubusercontent.com/wbmins/extensions-source/refs/heads/main/repo/icon/eu.kanade.tachiyomi.extension.all.ehentai.png"
         },
         "extensionLib": "1.4",
-        "versionCode": "31",
-        "versionName": "1.4.31",
+        "versionCode": "32",
+        "versionName": "1.4.32",
         "contentWarning": "CONTENT_WARNING_NSFW",
         "sources": [
           {
