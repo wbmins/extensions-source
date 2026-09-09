@@ -22,24 +22,44 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
+import keiyoushi.annotation.Source
 import keiyoushi.utils.getPreferencesLazy
 import okhttp3.CacheControl
 import okhttp3.CookieJar
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Element
 import rx.Observable
 import java.net.URLEncoder
 
-abstract class EHentai(
-    override val lang: String,
-    private val ehLang: String,
-) : HttpSource(),
+@Source
+abstract class EHentai :
+    HttpSource(),
     ConfigurableSource {
 
-    override val name = "E-Hentai"
+    private val ehLang: String
+        get() = when (lang) {
+            "ja" -> "japanese"
+            "en" -> "english"
+            "zh" -> "chinese"
+            "nl" -> "dutch"
+            "fr" -> "french"
+            "de" -> "german"
+            "hu" -> "hungarian"
+            "it" -> "italian"
+            "ko" -> "korean"
+            "pl" -> "polish"
+            "pt-BR" -> "portuguese"
+            "ru" -> "russian"
+            "es" -> "spanish"
+            "th" -> "thai"
+            "vi" -> "vietnamese"
+            "none" -> "n/a"
+            else -> "other"
+        }
 
     private val preferences: SharedPreferences by getPreferencesLazy()
 
@@ -341,13 +361,21 @@ abstract class EHentai(
         return MangasPage(listOf(details), false)
     }
 
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> = if (query.startsWith(PREFIX_ID_SEARCH)) {
-        val id = query.removePrefix(PREFIX_ID_SEARCH)
-        client.newCall(searchMangaByIdRequest(id))
-            .asObservableSuccess()
-            .map { response -> searchMangaByIdParse(response, id) }
-    } else {
-        super.fetchSearchManga(page, query, filters)
+    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
+        val galleryId = when {
+            query.startsWith(PREFIX_ID_SEARCH) -> query.removePrefix(PREFIX_ID_SEARCH)
+            // Deeplinks arrive as the full gallery URL
+            else -> query.toHttpUrlOrNull()?.let { url ->
+                url.pathSegments.takeIf { it.size >= 3 && it[0] == "g" }?.let { "${it[1]}/${it[2]}" }
+            }
+        }
+        return if (galleryId != null) {
+            client.newCall(searchMangaByIdRequest(galleryId))
+                .asObservableSuccess()
+                .map { response -> searchMangaByIdParse(response, galleryId) }
+        } else {
+            super.fetchSearchManga(page, query, filters)
+        }
     }
 
     override fun chapterListParse(response: Response) = throw UnsupportedOperationException()
